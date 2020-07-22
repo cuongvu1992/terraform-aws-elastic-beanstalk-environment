@@ -63,7 +63,7 @@ variable "environment_type" {
 
 variable "loadbalancer_type" {
   type        = string
-  default     = "classic"
+  default     = ""
   description = "Load Balancer type, e.g. 'application' or 'classic'"
 }
 
@@ -83,6 +83,12 @@ variable "allowed_security_groups" {
   type        = list(string)
   description = "List of security groups to add to the EC2 instances"
   default     = []
+}
+
+variable "ssh_source_restriction" {
+  type        = string
+  description = "EB Load Balancer security group"
+  default     = ""
 }
 
 variable "additional_security_groups" {
@@ -119,30 +125,6 @@ variable "instance_type" {
   description = "Instances type"
 }
 
-variable "enable_spot_instances" {
-  type        = bool
-  default     = false
-  description = "Enable Spot Instance requests for your environment"
-}
-
-variable "spot_fleet_on_demand_base" {
-  type        = number
-  default     = 0
-  description = "The minimum number of On-Demand Instances that your Auto Scaling group provisions before considering Spot Instances as your environment scales up. This option is relevant only when enable_spot_instances is true."
-}
-
-variable "spot_fleet_on_demand_above_base_percentage" {
-  type        = number
-  default     = -1
-  description = "The percentage of On-Demand Instances as part of additional capacity that your Auto Scaling group provisions beyond the SpotOnDemandBase instances. This option is relevant only when enable_spot_instances is true."
-}
-
-variable "spot_max_price" {
-  type        = number
-  default     = -1
-  description = "The maximum price per unit hour, in US$, that you're willing to pay for a Spot Instance. This option is relevant only when enable_spot_instances is true. Valid values are between 0.001 and 20.0"
-}
-
 variable "enhanced_reporting_enabled" {
   type        = bool
   default     = true
@@ -157,19 +139,34 @@ variable "managed_actions_enabled" {
 
 variable "autoscale_min" {
   type        = number
-  default     = 2
+  default     = 0
   description = "Minumum instances to launch"
 }
 
 variable "autoscale_max" {
   type        = number
-  default     = 3
+  default     = 0
   description = "Maximum instances to launch"
 }
 
 variable "solution_stack_name" {
   type        = string
   description = "Elastic Beanstalk stack, e.g. Docker, Go, Node, Java, IIS. For more info, see https://docs.aws.amazon.com/elasticbeanstalk/latest/platforms/platforms-supported.html"
+}
+
+variable "nodejs_version" {
+  default     = ""
+  description = "Elastic Beanstalk NodeJS version to deploy"
+}
+
+variable "iam_instance_profile" {
+  default     = ""
+  description = "IAM instance profile for webserver"
+}
+
+variable "iam_service_role" {
+  default     = ""
+  description = "IAM EB role"
 }
 
 variable "wait_for_ready_timeout" {
@@ -272,6 +269,26 @@ variable "logs_retention_in_days" {
   type        = number
   default     = 7
   description = "The number of days to keep log events before they expire."
+}
+
+variable "notification_protocol" {
+  default     = "email"
+  description = "Notification protocol"
+}
+
+variable "notification_endpoint" {
+  default     = ""
+  description = "Notification endpoint"
+}
+
+variable "notification_topic_arn" {
+  default     = ""
+  description = "Notification topic arn"
+}
+
+variable "notification_topic_name" {
+  default     = ""
+  description = "Notification topic name"
 }
 
 variable "loadbalancer_certificate_arn" {
@@ -392,12 +409,6 @@ variable "elb_scheme" {
   type        = string
   default     = "public"
   description = "Specify `internal` if you want to create an internal load balancer in your Amazon VPC so that your Elastic Beanstalk application cannot be accessed from outside your Amazon VPC"
-}
-
-variable "ssh_source_restriction" {
-  type        = string
-  default     = "0.0.0.0/0"
-  description = "Used to lock down SSH access to the EC2 instances"
 }
 
 variable "ssh_listener_enabled" {
